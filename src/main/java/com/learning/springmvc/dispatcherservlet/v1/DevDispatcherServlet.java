@@ -143,11 +143,8 @@ public class DevDispatcherServlet extends HttpServlet {
                             String paramName = ((DevRequestParam) item).value();
                             if (StringUtils.isNotEmpty(paramName)) {
                                 // 设置参数值 
-                                // 这里是为了得到所有参数，对参数进行了一个拼接
-                                // 因为可以这样写?name=1&name=2&name=3
-                                String[] values = params.get(paramName);
-                                String value = Joiner.on(",").join(values);
-                                paramValues[i] = value;
+                                // 目前这里只考虑一个参数的简单形式，走通流程
+                                paramValues[i] = req.getParameter(paramName);
                             }
                         }
                     }

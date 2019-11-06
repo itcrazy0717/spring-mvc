@@ -24,14 +24,13 @@ public class TestController {
     private TestService testService;
 
     @DevRequestMapping("/add")
-    public void add(HttpServletResponse resp, @DevRequestParam("name") String name, @DevRequestParam("age") String age) {
+    public void add(HttpServletResponse resp, @DevRequestParam("name") String name) {
         String result = testService.testMethod();
         try {
             resp.getWriter().write("testMethod invoke");
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println(result + "param:name=" + name + " age=" + age);
     }
 
     @DevRequestMapping("/delete")
