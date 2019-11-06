@@ -96,9 +96,9 @@ public class DevDispatcherServlet extends HttpServlet {
         Method method = handlerMapping.get(url);
 
         Map<String, String[]> params = req.getParameterMap();
-        // 先写死进行测试
+        // 先写死进行测试 注意这里的参数并没有动态获取，先写死为了测试使用
         String beanName = CommonUtils.toLowerFirstCase(method.getDeclaringClass().getSimpleName());
-        method.invoke(ioc.get(beanName), new Object[]{resp,params.get("name")[0]});
+        method.invoke(ioc.get(beanName), new Object[]{resp, params.get("name")[0]});
     }
 
     /**

@@ -36,6 +36,7 @@ public class TestController {
 
     @DevRequestMapping("/delete")
     public void delete(@DevRequestParam("name") String name) {
-        testService.testMethod();
+        String result = testService.testMethod();
+        System.out.println("delete method invoke");
     }
 }
