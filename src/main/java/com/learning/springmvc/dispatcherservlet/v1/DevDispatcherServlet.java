@@ -3,6 +3,7 @@ package com.learning.springmvc.dispatcherservlet.v1;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -22,11 +23,13 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.learning.springmvc.annotation.DevAutowired;
 import com.learning.springmvc.annotation.DevController;
 import com.learning.springmvc.annotation.DevRequestMapping;
+import com.learning.springmvc.annotation.DevRequestParam;
 import com.learning.springmvc.annotation.DevService;
 import com.learning.springmvc.util.CommonUtils;
 
@@ -95,10 +98,64 @@ public class DevDispatcherServlet extends HttpServlet {
 
         Method method = handlerMapping.get(url);
 
-        Map<String, String[]> params = req.getParameterMap();
-        // 先写死进行测试 注意这里的参数并没有动态获取，先写死为了测试使用
+        Object[] paramValues = buildParams(req, resp, method);
+
+        // 通过反射获取当前对象的名称
         String beanName = CommonUtils.toLowerFirstCase(method.getDeclaringClass().getSimpleName());
-        method.invoke(ioc.get(beanName), new Object[]{resp, params.get("name")[0]});
+        // 通过反射执行方法 
+        method.invoke(ioc.get(beanName), paramValues);
+    }
+
+    /**
+     * 构建请求参数
+     *
+     * @param req
+     * @param resp
+     * @param method
+     * @return
+     */
+    private Object[] buildParams(HttpServletRequest req, HttpServletResponse resp, Method method) {
+        // 获取参数键值集合
+        Map<String, String[]> params = req.getParameterMap();
+        // 获取方法上的参数集合
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        // 存储参数值
+        Object[] paramValues = new Object[parameterTypes.length];
+        for (int i = 0; i < parameterTypes.length; i++) {
+            Class<?> parameterType = parameterTypes[i];
+            if (parameterType == HttpServletRequest.class) {
+                paramValues[i] = req;
+            } else if (parameterType == HttpServletResponse.class) {
+                paramValues[i] = resp;
+            }
+            // 目前只处理String类型的参数
+            else if (parameterType == String.class) {
+                // 获取方法上的注解参数
+                Annotation[][] annotations = method.getParameterAnnotations();
+                // 循环为参数设置
+                for (int index = 0; index < annotations.length; index++) {
+                    // 获取当前注解参数
+                    Annotation[] annotation = annotations[i];
+                    for (Annotation item : annotation) {
+                        // 判断注解类型，因为可能存在其他注解
+                        if (item instanceof DevRequestParam) {
+                            // 获取参数名
+                            String paramName = ((DevRequestParam) item).value();
+                            if (StringUtils.isNotEmpty(paramName)) {
+                                // 设置参数值 
+                                // 这里是为了得到所有参数，对参数进行了一个拼接
+                                // 因为可以这样写?name=1&name=2&name=3
+                                String[] values = params.get(paramName);
+                                String value = Joiner.on(",").join(values);
+                                paramValues[i] = value;
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+        return paramValues;
     }
 
     /**
@@ -183,7 +240,7 @@ public class DevDispatcherServlet extends HttpServlet {
                     }
                     field.setAccessible(true);
                     try {
-                        // 为对象的属性设值
+                        // 为对象的属性设值 注入依赖
                         field.set(entry.getValue(), ioc.get(beanName));
                     } catch (IllegalAccessException e) {
                         e.printStackTrace();
