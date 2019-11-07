@@ -92,7 +92,10 @@ public class DevDispatcherServlet extends HttpServlet {
      */
     @Override
     public void init(ServletConfig config) throws ServletException {
-
+        // 模板模式 
+        // 在初始化类时，使用了注册式单例
+        // dispatch方法中使用了委派模式
+        // 在类型转换时可以使用策略模式
         // 1.加载配置文件
         doLoadConfig(config.getInitParameter(LOCATION));
 
