@@ -1,1 +1,3 @@
-"手写springmvc，增加对springmvc的深入了解"
+手写springmvc，增加对springmvc的深入了解
+项目中使用jetty插件作为web容器
+目前完成了DispatcherServlet的两个版本，大致模拟了springmvc的运行流程
