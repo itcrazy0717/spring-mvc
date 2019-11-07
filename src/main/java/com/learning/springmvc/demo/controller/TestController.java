@@ -22,17 +22,19 @@ public class TestController {
 
     @DevAutowired
     private TestService testService;
-    
+
     @DevRequestMapping("/add")
     public String add(@DevRequestParam("name") String name) {
         String result = testService.testMethod();
+        System.out.println("param:name=" + name);
         System.out.println(result);
         return result;
     }
 
-    @DevRequestMapping("/delete")
+    @DevRequestMapping("/delete.*")
     public void delete(@DevRequestParam("name") String name) {
         String result = testService.testMethod();
+        System.out.println("param:name=" + name);
         System.out.println("delete method invoke");
     }
 

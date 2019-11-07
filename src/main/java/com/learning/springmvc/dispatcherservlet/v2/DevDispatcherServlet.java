@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.stream.Stream;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -66,9 +66,8 @@ public class DevDispatcherServlet extends HttpServlet {
 
     /**
      * handlerMapping集合
-     * 存储url与handlerMapping的映射
      */
-    private Map<String, HandlerMapping> handlerMappingMap = Maps.newHashMap();
+    private List<HandlerMapping> handlerMappings = Lists.newArrayList();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -252,11 +251,12 @@ public class DevDispatcherServlet extends HttpServlet {
                     // 映射url
                     DevRequestMapping requestMapping = method.getAnnotation(DevRequestMapping.class);
                     String url = ("/" + baseUrl + "/" + requestMapping.value()).replaceAll("/+", "/");
+                    Pattern pattern = Pattern.compile(url);
                     // 构建handlerMapping
-                    if (handlerMappingMap.containsKey(url)) {
+                    if (handlerMappings.contains(pattern)) {
                         throw new IllegalArgumentException("已存在相同url请求");
                     }
-                    handlerMappingMap.put(url, new HandlerMapping(url, entry.getValue(), method));
+                    handlerMappings.add(new HandlerMapping(pattern, entry.getValue(), method));
                     System.out.println("Mapping:" + url + " Method:" + method);
                 }
 
@@ -338,7 +338,8 @@ public class DevDispatcherServlet extends HttpServlet {
      * @return
      */
     private HandlerMapping filterHandlerMapping(String url) {
-        return handlerMappingMap.getOrDefault(url, null);
+        Optional<HandlerMapping> result = handlerMappings.stream().filter(e -> e.pattern.matcher(url).matches()).findAny();
+        return result.orElse(null);
     }
 
     /**
@@ -346,7 +347,7 @@ public class DevDispatcherServlet extends HttpServlet {
      */
     private class HandlerMapping {
 
-        protected String url;
+        protected Pattern pattern;
 
         /**
          * 保存Controller实例
@@ -359,8 +360,8 @@ public class DevDispatcherServlet extends HttpServlet {
          */
         protected Map<String, Integer> paramIndexMap;
 
-        public HandlerMapping(String url, Object controller, Method method) {
-            this.url = url;
+        public HandlerMapping(Pattern pattern, Object controller, Method method) {
+            this.pattern = pattern;
             this.controller = controller;
             this.method = method;
 
