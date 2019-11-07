@@ -275,6 +275,9 @@ public class DevDispatcherServlet extends HttpServlet {
                         // 如果不存在自定义Service名称，则按照接口创建实例
                         Class<?>[] interfaces = clazz.getInterfaces();
                         for (Class<?> itemInterface : interfaces) {
+                            if (ioc.containsKey(itemInterface.getName())) {
+                                throw new RuntimeException("bean exists");
+                            }
                             ioc.put(itemInterface.getName(), clazz.newInstance());
                         }
                     } else {

@@ -22,20 +22,27 @@ public class TestController {
 
     @DevAutowired
     private TestService testService;
-
+    
     @DevRequestMapping("/add")
-    public void add(HttpServletResponse resp, @DevRequestParam("name") String name) {
+    public String add(@DevRequestParam("name") String name) {
         String result = testService.testMethod();
-        try {
-            resp.getWriter().write("testMethod invoke");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        System.out.println(result);
+        return result;
     }
 
     @DevRequestMapping("/delete")
     public void delete(@DevRequestParam("name") String name) {
         String result = testService.testMethod();
         System.out.println("delete method invoke");
+    }
+
+    @DevRequestMapping("/sub")
+    public void sub(HttpServletResponse response, @DevRequestParam("a") Integer a, @DevRequestParam("b") Integer b) {
+        try {
+            System.out.println("a=" + a + " b=" + b);
+            response.getWriter().write(a + "-" + b + "=" + (a - b));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

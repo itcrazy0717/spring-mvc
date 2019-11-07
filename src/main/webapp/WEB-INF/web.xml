@@ -10,7 +10,7 @@
 
     <servlet>
         <servlet-name>springmvc</servlet-name>
-        <servlet-class>com.learning.springmvc.dispatcherservlet.v1.DevDispatcherServlet</servlet-class>
+        <servlet-class>com.learning.springmvc.dispatcherservlet.v2.DevDispatcherServlet</servlet-class>
         <init-param>
             <param-name>contextConfigLocation</param-name>
             <param-value>application.properties</param-value>
